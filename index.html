@@ -3,26 +3,26 @@
 <head>
   <!-- Kenneth Kufluk 2008/09/10 -->
   <title>js-mindmap demo - JavaScript Mindmap</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-  <link rel="stylesheet" type="text/css" href="js-mindmap.css" />
-  <link href="style.css" type="text/css" rel="stylesheet"/>
+  <meta charset="utf-8"/>
+  <!-- CSSファイルの読み込み -->
+  <link rel="stylesheet" href="js-mindmap.css" />
+  <link rel="stylesheet" href="style.css"/>
 
-  <!-- jQuery -->
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" type="text/javascript"></script>
-  <!-- UI, for draggable nodes -->
-  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.15/jquery-ui.min.js"></script>
+  <!-- jQueryとjQuery UIの読み込み -->
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.15/jquery-ui.min.js"></script>
 
-  <!-- Raphael for SVG support (won't work on android) -->
-  <script type="text/javascript" src="raphael-min.js"></script>
+  <!-- SVGサポートのためのRaphaelライブラリの読み込み -->
+  <script src="raphael-min.js"></script>
 
-  <!-- Mindmap -->
-  <script type="text/javascript" src="js-mindmap.js"></script>
+  <!-- マインドマップのスクリプト -->
+  <script src="js-mindmap.js"></script>
 
-  <!-- Kick everything off -->
-  <script src="script.js" type="text/javascript"></script>
-
+  <!-- 初期化スクリプト -->
+  <script src="script.js"></script>
 </head>
 <body>
+  <!-- マインドマップのデータ（リスト形式） -->
   <ul>
     <li><a href="#">アルファベット</a>
       <ul>
@@ -34,6 +34,5 @@
       </ul>
     </li>
   </ul>
-  
 </body>
 </html>
