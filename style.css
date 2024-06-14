@@ -1,9 +1,11 @@
+
+
 body {
-  background: green;
+  background: rgb(184, 198, 184);
 }
 
 .js-mindmap-active a.node {
-  background: red;
+  background: rgb(5, 96, 123);
   border: 2px solid white;
   border-top-left-radius: 20px;
   border-bottom-right-radius: 20px;

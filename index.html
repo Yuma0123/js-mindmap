@@ -10,43 +10,60 @@
   <script src="raphael-min.js"></script>
   <script src="js-mindmap.js"></script>
   <script src="script.js"></script>
+  <style>
+    #mapForm {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background-color: #fff;
+      padding: 10px;
+      border: 1px solid #ccc;
+      z-index: 1000;
+      margin-bottom: 20px;
+    }
+
+    #nodeForm {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #fff;
+      padding: 10px;
+      border: 1px solid #ccc;
+      z-index: 1000;
+      margin-bottom: 20px;
+    }
+
+    #childNodeText {
+      width: 100%;
+      height: 100px; /* 3行くらいの高さに設定 */
+    }
+  </style>
 </head>
 <body>
-  <div id="mindmap1">
-    <ul>
-      <li><a href="#">アルファベット1</a>
-        <ul>
-          <li><a href="#">B1</a></li>
-          <li><a href="#">C1</a></li>
-          <li><a href="#">D1</a></li>
-          <li><a href="#">E1</a></li>
-        </ul>
-      </li>
-    </ul>
-  </div>
-  <div id="mindmap2">
-    <ul>
-      <li><a href="#">アルファベット2</a>
-        <ul>
-          <li><a href="#">B2</a></li>
-          <li><a href="#">C2</a></li>
-          <li><a href="#">D2</a></li>
-          <li><a href="#">E2</a></li>
-        </ul>
-      </li>
-    </ul>
-  </div>
-  <div id="mindmap3">
-    <ul>
-      <li><a href="#">アルファベット2</a>
-        <ul>
-          <li><a href="#">B2</a></li>
-          <li><a href="#">C2</a></li>
-          <li><a href="#">D2</a></li>
-          <li><a href="#">E2</a></li>
-        </ul>
-      </li>
-    </ul>
-  </div>
+  <form id="mapForm">
+    <label for="rootNodeText">思考トピック</label>
+    <input type="text" id="rootNodeText" required>
+    <br>
+    <label for="childNodeText">フィードバック・考え</label>
+    <textarea id="childNodeText" placeholder="フィードバックや考えを一つずつ改行して入力してください" required></textarea>
+    <br>
+    <label for="relatedMapSelect">関連付け先のマインドマップ</label>
+    <select id="relatedMapSelect">
+      <option value="">なし</option>
+    </select>
+    <br>
+    <button type="submit">思考トピック作成</button>
+  </form>
+
+  <form id="nodeForm">
+    <label for="mapSelect">子ノード追加</label>
+    <select id="mapSelect"></select>
+    <br>
+    <label for="nodeText">追加内容</label>
+    <input type="text" id="nodeText" required>
+    <br>
+    <button type="submit">追加</button>
+  </form>
 </body>
 </html>

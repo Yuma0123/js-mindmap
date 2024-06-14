@@ -155,7 +155,7 @@
 
   Node.prototype.updatePosition = function () {
     var forces, showx, showy;
-
+  
     if (this.el.hasClass("ui-draggable-dragging")) {
       this.x = parseInt(this.el.css('left'), 10) + (this.el.width() / 2);
       this.y = parseInt(this.el.css('top'), 10) + (this.el.height() / 2);
@@ -163,14 +163,14 @@
       this.dy = 0;
       return false;
     }
-
+  
     forces = this.getForceVector();
     this.dx += forces.x * this.options.timeperiod;
     this.dy += forces.y * this.options.timeperiod;
-
+  
     this.dx = this.dx * this.options.damping;
     this.dy = this.dy * this.options.damping;
-
+  
     if (Math.abs(this.dx) < this.options.minSpeed) {
       this.dx = 0;
     }
@@ -180,16 +180,18 @@
     if (Math.abs(this.dx) + Math.abs(this.dy) === 0) {
       return true;
     }
-
+  
     this.x += this.dx * this.options.timeperiod;
     this.y += this.dy * this.options.timeperiod;
-    this.x = Math.min(this.options.mapArea.x, Math.max(1, this.x));
-    this.y = Math.min(this.options.mapArea.y, Math.max(1, this.y));
+    // この行を削除
+    // this.x = Math.min(this.options.mapArea.x, Math.max(1, this.x));
+    // this.y = Math.min(this.options.mapArea.y, Math.max(1, this.y));
     showx = this.x - (this.el.width() / 2);
     showy = this.y - (this.el.height() / 2) - 10;
     this.el.css({'left': showx + "px", 'top': showy + "px"});
     return false;
   };
+  
 
   Node.prototype.getForceVector = function () {
     var i, x1, y1, xsign, dist, theta, f,
@@ -314,6 +316,7 @@
       y: fy
     };
   };
+  
 
   Node.prototype.removeNode = function () {
     var i,
@@ -507,4 +510,3 @@
     });
   };
 }(jQuery));
-
