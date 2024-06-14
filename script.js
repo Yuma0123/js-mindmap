@@ -80,6 +80,12 @@ $(document).ready(function() {
 
   // 矢印を更新する関数
   function updateArrows() {
+    // 全ての矢印を再描画
+    Object.keys(arrows).forEach(function(arrowId) {
+      arrows[arrowId].remove();
+      delete arrows[arrowId];
+    });
+
     mindmaps.forEach(function(map) {
       if (map.relatedTo) {
         var relatedMap = mindmaps.find(function(m) { return m.id === map.relatedTo; });
@@ -130,6 +136,9 @@ $(document).ready(function() {
 
     // ノードの位置をログ出力
     console.log('New node added:', nodeText, 'Position:', newNode.getPosition());
+
+    // 矢印を更新
+    updateArrows();
   });
 
   // 新しいマインドマップの作成を処理
@@ -220,10 +229,13 @@ $(document).ready(function() {
     // 新しいマインドマップをセレクトボックスに追加
     $('#mapSelect, #relatedMapSelect').append('<option value="' + newMapId + '">' + rootNodeText + '</option>');
 
+    // 新しいマインドマップの親ノード間に矢印を描画
+    if (relatedMapId) {
+      var relatedMap = mindmaps.find(function(map) { return map.id === relatedMapId; });
+      drawArrow(relatedMap.rootNode, root);
+    }
+
     // 矢印を更新
     updateArrows();
   });
-
-  // 初期矢印描画
-  updateArrows();
 });
