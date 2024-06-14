@@ -74,6 +74,11 @@
 
   };
 
+  Node.prototype.getPosition = function () {
+    return { x: this.x, y: this.y };
+  };
+  
+
   Node.prototype.animateToStatic = function () {
     clearTimeout(this.moveTimer);
     var thisnode = this;
@@ -152,7 +157,7 @@
     });
     return this.updatePosition();
   };
-
+  
   Node.prototype.updatePosition = function () {
     var forces, showx, showy;
   
@@ -183,14 +188,20 @@
   
     this.x += this.dx * this.options.timeperiod;
     this.y += this.dy * this.options.timeperiod;
-    // この行を削除
-    // this.x = Math.min(this.options.mapArea.x, Math.max(1, this.x));
-    // this.y = Math.min(this.options.mapArea.y, Math.max(1, this.y));
+    
     showx = this.x - (this.el.width() / 2);
     showy = this.y - (this.el.height() / 2) - 10;
     this.el.css({'left': showx + "px", 'top': showy + "px"});
+  
+    // ノードの位置が変更されたことを通知するカスタムイベントを発火
+    var event = new CustomEvent('nodeMoved', { detail: { node: this, x: this.x, y: this.y } });
+    document.dispatchEvent(event);
+  
     return false;
   };
+  
+  
+  
   
 
   Node.prototype.getForceVector = function () {

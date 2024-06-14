@@ -3,6 +3,7 @@ $(document).ready(function() {
   var mapPositions = {};
   var verticalSpacing = 250;
   var horizontalSpacing = 300;
+  var arrows = {};
 
   $('#mindmap1, #mindmap2, #mindmap3').each(function(index, mapElement) {
     var $map = $(mapElement);
@@ -55,6 +56,56 @@ $(document).ready(function() {
     $('#mapSelect, #relatedMapSelect').append('<option value="' + mapId + '">' + $map.find('>ul>li>a').text() + '</option>');
   });
 
+  // 矢印を描画するための関数
+  function drawArrow(fromNode, toNode) {
+    var fromPosition = fromNode.getPosition();
+    var toPosition = toNode.getPosition();
+    var arrowId = fromNode.name + '->' + toNode.name;
+
+    if (arrows[arrowId]) {
+      arrows[arrowId].remove();
+    }
+
+    var angle = Math.atan2(toPosition.y - fromPosition.y, toPosition.x - fromPosition.x);
+    var arrow = $('<div class="arrow">⇒</div>').css({
+      position: 'absolute',
+      left: (fromPosition.x + toPosition.x) / 2,
+      top: (fromPosition.y + toPosition.y) / 2,
+      transform: 'rotate(' + angle + 'rad)'
+    });
+
+    $('body').append(arrow);
+    arrows[arrowId] = arrow;
+  }
+
+  // 矢印を更新する関数
+  function updateArrows() {
+    mindmaps.forEach(function(map) {
+      if (map.relatedTo) {
+        var relatedMap = mindmaps.find(function(m) { return m.id === map.relatedTo; });
+        if (relatedMap) {
+          drawArrow(relatedMap.rootNode, map.rootNode);
+        }
+      }
+    });
+  }
+
+  // カスタムイベント 'nodeMoved' をリッスンして矢印を更新
+  document.addEventListener('nodeMoved', function(event) {
+    var node = event.detail.node;
+
+    // 親ノードの位置をログ出力
+    mindmaps.forEach(function(map) {
+      if (map.rootNode === node) {
+        var position = node.getPosition();
+        console.log('Parent node moved:', map.title, 'Position:', position);
+      }
+    });
+
+    // 矢印を更新
+    updateArrows();
+  });
+
   // フォームの送信を処理
   $('#nodeForm').submit(function(event) {
     event.preventDefault();
@@ -65,7 +116,7 @@ $(document).ready(function() {
     var $map = $('#' + mapId);
     var rootNode = $map[0].nodes[0];
     
-    $map.addNode(rootNode, nodeText, {
+    var newNode = $map.addNode(rootNode, nodeText, {
       href: '#',
       onclick: function(node) {
         $(node.obj.activeNode.content).each(function() {
@@ -76,6 +127,9 @@ $(document).ready(function() {
         });
       }
     });
+
+    // ノードの位置をログ出力
+    console.log('New node added:', nodeText, 'Position:', newNode.getPosition());
   });
 
   // 新しいマインドマップの作成を処理
@@ -165,5 +219,11 @@ $(document).ready(function() {
     
     // 新しいマインドマップをセレクトボックスに追加
     $('#mapSelect, #relatedMapSelect').append('<option value="' + newMapId + '">' + rootNodeText + '</option>');
+
+    // 矢印を更新
+    updateArrows();
   });
+
+  // 初期矢印描画
+  updateArrows();
 });
