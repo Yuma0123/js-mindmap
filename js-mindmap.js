@@ -1,20 +1,11 @@
-/*
- js-mindmap
-
- MIT (X11) license
-*/
-
-// jQueryの即時関数を使用
 (function ($) {
   'use strict';
 
-  // 定数の定義
-  var TIMEOUT = 4,  // 動作タイムアウト時間（秒）
-    CENTRE_FORCE = 3,  // 中心に引き寄せる力の強さ
+  var TIMEOUT = 4,
+    CENTRE_FORCE = 3,
     Node,
     Line;
 
-  // Nodeクラスの定義
   Node = function (obj, name, parent, opts) {
     this.obj = obj;
     this.options = obj.options;
@@ -25,9 +16,8 @@
       this.url = opts.url;
     }
 
-    // 表示用の要素を作成
     this.el = $('<a href="' + this.href + '">' + this.name + '</a>').addClass('node');
-    $('body').prepend(this.el);
+    $(obj.mapElement).prepend(this.el);
 
     if (!parent) {
       obj.activeNode = this;
@@ -41,7 +31,6 @@
       this.parent.children.push(this);
     }
 
-    // アニメーション関連の設定
     this.moving = false;
     this.moveTimer = 0;
     this.obj.movementStopped = false;
@@ -52,7 +41,7 @@
     this.dy = 0;
     this.hasPosition = false;
 
-    this.content = []; // クリック時に表示するコンテンツの配列
+    this.content = [];
 
     this.el.css('position', 'absolute');
 
@@ -87,10 +76,13 @@
 
   };
 
-  // ルートノードのみ: アニメーションループの制御
+  Node.prototype.getPosition = function () {
+    return { x: this.x, y: this.y };
+  };
+  
+
   Node.prototype.animateToStatic = function () {
     clearTimeout(this.moveTimer);
-    // 一定時間後に動作を停止
     var thisnode = this;
     this.moveTimer = setTimeout(function () {
       thisnode.obj.movementStopped = true;
@@ -104,7 +96,6 @@
     this.animateLoop();
   };
 
-  // ルートノードのみ: 全ノードをアニメーション（再帰的に呼び出される）
   Node.prototype.animateLoop = function () {
     var i, len, mynode = this;
     this.obj.canvas.clear();
@@ -120,7 +111,6 @@
     }, 10);
   };
 
-  // このノードの適正位置を見つける
   Node.prototype.findEquilibrium = function () {
     var i, len, stable = true;
     stable = this.display() && stable;
@@ -130,7 +120,6 @@
     return stable;
   };
 
-  // このノードとその子ノードを表示
   Node.prototype.display = function (depth) {
     var parent = this,
       stepAngle,
@@ -139,7 +128,6 @@
     depth = depth || 0;
 
     if (this.visible) {
-      // 自分や親ノードがアクティブでない場合、非表示にする
       if (this.obj.activeNode !== this && this.obj.activeNode !== this.parent && this.obj.activeNode.parent !== this) {
         this.el.hide();
         this.visible = false;
@@ -152,16 +140,12 @@
       }
     }
     this.drawn = true;
-
-    // 位置が設定されていない場合、中央に配置
     if (!this.hasPosition) {
-      this.x = this.options.mapArea.x / 2;
-      this.y = this.options.mapArea.y / 2;
+      this.x = this.options.initialX || (this.options.mapArea.x / 2);
+      this.y = this.options.initialY || (this.options.mapArea.y / 2);
       this.el.css({'left': this.x + "px", 'top': this.y + "px"});
       this.hasPosition = true;
     }
-
-    // 子ノードを配置
     stepAngle = Math.PI * 2 / this.children.length;
     $.each(this.children, function (index) {
       if (!this.hasPosition) {
@@ -174,16 +158,12 @@
         }
       }
     });
-
-    // 位置を更新
     return this.updatePosition();
   };
-
-  // 位置を更新し、静止しているかどうかを返す
+  
   Node.prototype.updatePosition = function () {
     var forces, showx, showy;
-
-    // ドラッグ中の場合、位置を更新して終了
+  
     if (this.el.hasClass("ui-draggable-dragging")) {
       this.x = parseInt(this.el.css('left'), 10) + (this.el.width() / 2);
       this.y = parseInt(this.el.css('top'), 10) + (this.el.height() / 2);
@@ -191,17 +171,14 @@
       this.dy = 0;
       return false;
     }
-
-    // 力の計算
+  
     forces = this.getForceVector();
     this.dx += forces.x * this.options.timeperiod;
     this.dy += forces.y * this.options.timeperiod;
-
-    // 力の減衰
+  
     this.dx = this.dx * this.options.damping;
     this.dy = this.dy * this.options.damping;
-
-    // 最小速度の適用
+  
     if (Math.abs(this.dx) < this.options.minSpeed) {
       this.dx = 0;
     }
@@ -211,23 +188,28 @@
     if (Math.abs(this.dx) + Math.abs(this.dy) === 0) {
       return true;
     }
-
-    // 速度ベクトルの適用
+  
     this.x += this.dx * this.options.timeperiod;
     this.y += this.dy * this.options.timeperiod;
-    this.x = Math.min(this.options.mapArea.x, Math.max(1, this.x));
-    this.y = Math.min(this.options.mapArea.y, Math.max(1, this.y));
-
-    // 表示位置の更新
+    
     showx = this.x - (this.el.width() / 2);
     showy = this.y - (this.el.height() / 2) - 10;
     this.el.css({'left': showx + "px", 'top': showy + "px"});
+  
+    // ノードの位置が変更されたことを通知するカスタムイベントを発火
+    var event = new CustomEvent('nodeMoved', { detail: { node: this, x: this.x, y: this.y } });
+    document.dispatchEvent(event);
+  
     return false;
   };
+  
+  
+  
+  
 
   Node.prototype.getForceVector = function () {
     var i, x1, y1, xsign, dist, theta, f,
-      xdist, rightdist, bottomdist, otherend,
+      otherend,
       fx = 0,
       fy = 0,
       nodes = this.obj.nodes,
@@ -262,7 +244,8 @@
       }
     }
 
-    // 壁からの反発力の追加
+    // 壁からの反発力の追加をコメントアウト
+    /*
     xdist = this.x + this.el.width();
     f = (this.options.wallrepulse * 500) / (xdist * xdist);
     fx += Math.min(2, f);
@@ -277,6 +260,7 @@
     bottomdist = (this.options.mapArea.y - this.y);
     f = -(this.options.wallrepulse * 500) / (bottomdist * bottomdist);
     fy += Math.max(-2, f);
+    */
 
     // 自分が関わる各ラインに引力を追加
     for (i = 0; i < lines.length; i++) {
@@ -312,7 +296,8 @@
       }
     }
 
-    // アクティブな場合、中心に引き寄せる力を追加
+    // 中心への引力をコメントアウト
+    /*
     if (this.obj.activeNode === this) {
       otherend = this.options.mapArea;
       x1 = ((otherend.x / 2) - this.options.centreOffset - this.x);
@@ -332,6 +317,7 @@
         fy += f * Math.sin(theta) * xsign;
       }
     }
+    */
 
     if (Math.abs(fx) > this.options.maxForce) {
       fx = this.options.maxForce * (fx / Math.abs(fx));
@@ -344,6 +330,7 @@
       y: fy
     };
   };
+  
 
   Node.prototype.removeNode = function () {
     var i,
@@ -375,7 +362,6 @@
     this.el.remove();
   };
 
-  // Lineクラスの定義
   Line = function (obj, startNode, endNode) {
     this.obj = obj;
     this.options = obj.options;
@@ -415,13 +401,11 @@
   // ノードを削除するjQueryプラグイン（未実装）
   $.fn.removeNode = function (name) {
     return this.each(function () {
-      // 未実装
     });
   };
 
   // マインドマップを初期化するjQueryプラグイン
   $.fn.mindmap = function (options) {
-    // デフォルト設定を定義
     options = $.extend({
       attract: 15,
       repulse: 6,
@@ -446,6 +430,7 @@
 
     return this.each(function () {
       var mindmap = this;
+      this.mapElement = mindmap;
 
       this.mindmapInit = true;
       this.nodes = [];
@@ -459,7 +444,6 @@
         mindmap.animateToStatic();
       });
 
-      // キャンバスの初期化
       if (options.mapArea.x === -1) {
         options.mapArea.x = $window.width();
       }
@@ -467,13 +451,18 @@
         options.mapArea.y = $window.height();
       }
 
-      // 描画領域を作成
-      this.canvas = Raphael(0, 0, options.mapArea.x, options.mapArea.y);
+      var $canvasContainer = $('<div>').appendTo(this);
+      $canvasContainer.css({
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: options.mapArea.x,
+        height: options.mapArea.y
+      });
+      this.canvas = Raphael($canvasContainer[0], options.mapArea.x, options.mapArea.y);
 
-      // オブジェクトにクラスを追加してスタイルを適用
       $(this).addClass('js-mindmap-active');
 
-      // キーボードサポートの追加
       $(this).keyup(function (event) {
         var newNode, i, activeParent = mindmap.activeNode.parent;
         switch (event.which) {
